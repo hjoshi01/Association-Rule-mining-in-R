@@ -1,0 +1,97 @@
+---
+title: "IST 707 Harshit HW3"
+author: "HW 2"
+date: "2023-02-13"
+output: html_document
+---
+
+```{r}
+library(arules)
+bank_data = read.transactions('C:/Users/harsh/OneDrive/Documents/IST 707  AML/Lecture3/bank-data.csv' , format = 'basket', sep = ',' )|>
+  select( id=id, age, sex, region, income, married, children, save_act, current_act, mortgage,pep)
+```
+```{r}
+library(dplyr)
+
+bank_data.records = read.delim('C:/Users/harsh/OneDrive/Documents/IST 707  AML/Lecture3/bank-data.csv',header=TRUE, sep=",") |> select( id=id, age, sex, region,income,married,children,save_act,current_act,mortgage,pep)
+
+glimpse(bank_data.records)
+
+bank_data.transactions = bank_data.records |> 
+  # remove the id variable since this is unique to each customer
+  select(-id) |> 
+  
+  # convert the numeric variable Age into discrete categories #from class code
+  mutate(age = case_when(
+    age >= 70 ~ 'elderly',
+    age >= 60 ~ 'sixties',
+    age >= 50 ~ 'fifties',
+    age >= 40 ~ 'forties',
+    age >= 30 ~ 'thirties',
+    age >= 20 ~ 'twenties',
+    age >= 10 ~ 'teens',
+    TRUE ~ 'child'
+  )) |> 
+  
+  mutate(children = case_when
+         (children == 1 ~ 'one_child', 
+           children ==2 ~'two_children',
+           children ==3 ~ 'three_children',
+           children ==0 ~'No_children')) |> 
+   mutate(income=case_when
+    (income>=40000 ~ 'hi_income',
+      income>=20000 ~ 'mid_income',
+      income>=5000 ~ 'less_income'
+         )) |> 
+  mutate_all(as.factor) # convert everything to a factor
+```
+```{r}
+
+```
+```{r}
+glimpse(bank_data.transactions)
+
+```
+```{r}
+Rule1 <- apriori(data=bank_data.transactions, parameter = list(support=0.15, confidence= 0.66))
+inspect(Rule1)
+#257 rules
+```
+
+
+```{r}
+Rule2 <- apriori(data=bank_data.transactions, parameter = list(support=0.25, confidence= 0.5))
+inspect(Rule2)
+#101 rules
+```
+
+
+```{r}
+Rule3 <- apriori(data=bank_data.transactions, parameter = list(support=0.31, confidence= 0.68))
+inspect(Rule3)
+#25 rules
+```
+
+
+```{r}
+myrules1 <- apriori(data=bank_data.transactions, parameter=list(support=0.31,confidence = 0.68),
+                      appearance = list(default="lhs",rhs=('pep=YES')),control = list(verbose=F))
+```
+```{r}
+
+summary(myrules1)
+```
+
+
+```{r}
+myrules <- apriori(data=bank_data.transactions, parameter=list(support=0.11,confidence = 0.7),
+                      appearance = list(default="lhs",rhs=('pep=YES')),control = list(verbose=F))
+```
+```{r}
+inspect(myrules)
+```
+
+
+
+
+
